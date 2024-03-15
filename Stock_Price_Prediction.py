@@ -1,5 +1,3 @@
-
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -40,88 +38,74 @@ def main():
     user_input = st.text_input("Enter any Stock's Ticker Symbol", 'MSFT')
     stock_ticker = user_input.upper()  # Convert to uppercase for consistency
 
-    # Load data for the selected stock
-    df = load_stock_data(stock_ticker, '2014-01-01', '2023-12-31')
+    # Check if user has entered a ticker symbol
+    if stock_ticker:
+        # Show a spinner while loading data
+        with st.spinner("Fetching data..."):
+            # Load data for the selected stock
+            df = load_stock_data(stock_ticker, '2014-01-01', '2023-12-31')
 
-    # Display summary statistical data
-    st.subheader("Summary Statistics for stocks from 2014 to 2023")
-    st.write(df.describe()) 
+        # Display summary statistical data
+        st.subheader("Summary Statistics for stocks from 2014 to 2023")
+        st.write(df.describe()) 
 
-    # Closing Price vs Time graph
-    # Visualizations 
-    st.subheader("Closing Price vs Time graph")
-    fig = plt.figure(figsize=(12,6))
-    plt.plot(df, color='black', label='Closing Price')
-    plt.xlabel("Time")
-    plt.ylabel("Closing Price")
-    plt.legend()
-    st.pyplot(fig)
+        # Closing Price vs Time graph
+        # Visualizations 
+        st.subheader("Closing Price vs Time graph")
+        fig = plt.figure(figsize=(12,6))
+        plt.plot(df, color='black', label='Closing Price')
+        plt.xlabel("Time")
+        plt.ylabel("Closing Price")
+        plt.legend()
+        st.pyplot(fig)
 
+        # Closing Price vs Time graph with 100-day Moving Average
+        # Visualizations 
+        st.subheader("Closing Price vs Time graph with 100MA")
+        ma100 = df.rolling(100).mean()
+        fig = plt.figure(figsize=(12,6))
+        plt.plot(ma100, color='blue', label='100MA')
+        plt.plot(df, color='black', label='Closing Price')
+        plt.xlabel("Time")
+        plt.ylabel("Closing Price")
+        plt.legend()
+        st.pyplot(fig)
 
-    # Closing Price vs Time graph with 100-day Moving Average
-    # Visualizations 
-    st.subheader("Closing Price vs Time graph with 100MA")
-    ma100 = df.rolling(100).mean()
-    fig = plt.figure(figsize=(12,6))
-    plt.plot(ma100, color='blue', label='100MA')
-    plt.plot(df, color='black', label='Closing Price')
-    plt.xlabel("Time")
-    plt.ylabel("Closing Price")
-    plt.legend()
-    st.pyplot(fig)
+        # Closing Price vs Time graph with 100-day and 200-day Moving Averages
+        # Visualizations 
+        st.subheader("Closing Price vs Time graph with 100MA & 200MA")
+        ma100 = df.rolling(100).mean()
+        ma200 = df.rolling(200).mean()
+        fig = plt.figure(figsize=(12,6))
+        plt.plot(ma100, color='blue', label='100MA')
+        plt.plot(ma200, color='red', label='200MA')
+        plt.plot(df, color='black', label='Closing Price')
+        plt.xlabel("Time")
+        plt.ylabel("Closing Price")
+        plt.legend()
+        st.pyplot(fig)
 
+        # Split data into training and testing
+        train_size = int(len(df) * 0.70)
+        df_train, df_test = df[:train_size], df[train_size:]
 
-    # Closing Price vs Time graph with 100-day and 200-day Moving Averages
-    # Visualizations 
-    st.subheader("Closing Price vs Time graph with 100MA & 200MA")
-    ma100 = df.rolling(100).mean()
-    ma200 = df.rolling(200).mean()
-    fig = plt.figure(figsize=(12,6))
-    plt.plot(ma100, color='blue', label='100MA')
-    plt.plot(ma200, color='red', label='200MA')
-    plt.plot(df, color='black', label='Closing Price')
-    plt.xlabel("Time")
-    plt.ylabel("Closing Price")
-    plt.legend()
-    st.pyplot(fig)
+        # Scale data
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        scaler.fit(df_train.values.reshape(-1, 1))
 
+        # Prepare training and testing data
+        X_train, y_train = prepare_data(df_train, scaler)
+        X_test, y_test = prepare_data(df_test, scaler)
 
-    # Split data into training and testing
-    train_size = int(len(df) * 0.70)
-    df_train, df_test = df[:train_size], df[train_size:]
+        # Load model
+        model = load_stock_model("Stock_Price_Model.keras")
 
-    # Scale data
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    scaler.fit(df_train.values.reshape(-1, 1))
+        # Make predictions
+        y_predict = model.predict(X_test)
+        y_predict = scaler.inverse_transform(y_predict)
+        y_test = scaler.inverse_transform(y_test.reshape(-1, 1))
 
-    # Prepare training and testing data
-    X_train, y_train = prepare_data(df_train, scaler)
-    X_test, y_test = prepare_data(df_test, scaler)
-
-    # Load model
-    model = load_stock_model("Stock_Price_Model.keras")
-
-    # Make predictions
-    y_predict = model.predict(X_test)
-    y_predict = scaler.inverse_transform(y_predict)
-    y_test = scaler.inverse_transform(y_test.reshape(-1, 1))
-
-    # Calculate metrics
-    mae = mean_absolute_error(y_test, y_predict)
-    r2 = r2_score(y_test, y_predict)
-    rmse = mean_squared_error(y_test, y_predict, squared=False)
-
-    # Display metrics
-    st.subheader("Metrics to evaluate the performance of the model:")
-    st.write("Mean Absolute Error (MAE):", mae)
-    st.write("R-squared (R2) Score:", r2)
-    st.write("Root Mean Squared Error (RMSE):", rmse)
-
-if __name__ == "__main__":
-    main()
-
-
-
-
-
-
+        # Calculate metrics
+        mae = mean_absolute_error(y_test, y_predict)
+        r2 = r2_score(y_test, y_predict)
+        rmse = mean_squared_error(y_test, y_predict,
