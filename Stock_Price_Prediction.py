@@ -27,8 +27,7 @@ def load_stock_model(model_path):
 
 # Load data for the selected stock
 def load_stock_data(stock_ticker, start_date, end_date):
-    df = yf.download(stock_ticker, start=start_date, end=end_date)
-    df.index = df.index.tz_localize(None)  # Remove timezone information
+    df = pdr.get_data_yahoo(stock_ticker, start=start_date, end=end_date)
     return df['Close']
 
 # Streamlit app
@@ -37,19 +36,10 @@ def main():
 
     # User input for stock ticker
     user_input = st.text_input("Enter any Stock's Ticker Symbol", 'MSFT')
-    if not user_input:
-        st.warning("Please enter a valid stock ticker symbol.")
-        return
-
     stock_ticker = user_input.upper()  # Convert to uppercase for consistency
 
     # Load data for the selected stock
     df = load_stock_data(stock_ticker, '2014-01-01', '2023-12-31')
-
-    # Print debug information
-    st.write("Data loaded successfully.")
-    st.write("Head of the data:")
-    st.write(df.head())
 
     # Display summary statistical data
     st.subheader("Summary Statistics for stocks from 2014 to 2023")
@@ -65,6 +55,7 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
+
     # Closing Price vs Time graph with 100-day Moving Average
     # Visualizations 
     st.subheader("Closing Price vs Time graph with 100MA")
@@ -76,6 +67,7 @@ def main():
     plt.ylabel("Closing Price")
     plt.legend()
     st.pyplot(fig)
+
 
     # Closing Price vs Time graph with 100-day and 200-day Moving Averages
     # Visualizations 
@@ -90,6 +82,7 @@ def main():
     plt.ylabel("Closing Price")
     plt.legend()
     st.pyplot(fig)
+
 
     # Split data into training and testing
     train_size = int(len(df) * 0.70)
