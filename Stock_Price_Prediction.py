@@ -28,6 +28,7 @@ def load_stock_model(model_path):
 # Load data for the selected stock
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
+    df.index = df.index.tz_localize(None)  # Remove timezone information
     return df['Close']
 
 # Streamlit app
