@@ -45,6 +45,11 @@ def main():
     # Load data for the selected stock
     df = load_stock_data(stock_ticker, '2014-01-01', '2023-12-31')
 
+    # Print debug information
+    st.write("Data loaded successfully.")
+    st.write("Head of the data:")
+    st.write(df.head())
+
     # Display summary statistical data
     st.subheader("Summary Statistics for stocks from 2014 to 2023")
     st.write(df.describe()) 
