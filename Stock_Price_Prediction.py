@@ -8,7 +8,9 @@ from pandas_datareader import data as pdr
 import yfinance as yf
 from tensorflow.keras.models import load_model
 import streamlit as st
-
+# Creating a Deep Learning model using keras
+from keras.layers import Dense, Dropout, LSTM
+from keras.models import Sequential
 
 # defining the start and end date of stock prices
 start_date ='2014-01-01'
@@ -80,8 +82,23 @@ for i in range(100, len(df_train_scaled)):
 X_train, y_train = np.array(X_train), np.array(y_train)
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1)) 
 
-# Load the model
-my_model = load_model("Stock_Price_Model (1).h5")
+# Model Architecture
+Stock_model = Sequential()
+Stock_model.add(LSTM(units=50, return_sequences=True, input_shape=(X_train.shape[1], 1)))
+Stock_model.add(Dropout(0.2))
+Stock_model.add(LSTM(units=60, return_sequences=True))
+Stock_model.add(Dropout(0.3))
+Stock_model.add(LSTM(units=80, return_sequences=True))
+Stock_model.add(Dropout(0.4))
+Stock_model.add(LSTM(units=50))
+Stock_model.add(Dropout(0.5))
+Stock_model.add(Dense(units=1))
+
+# Compiling the model
+Stock_model.compile(optimizer='adam', loss='mean_squared_error')
+
+# Training the model
+Stock_model.fit(X_train, y_train, epochs=50, batch_size=32)
 
 # Prepare test data
 X_test, y_test = [], []
@@ -93,7 +110,7 @@ X_test, y_test = np.array(X_test), np.array(y_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
 # Predictions
-y_predict = my_model.predict(X_test)
+y_predict = Stock_model.predict(X_test)
 
 # Inverse scaling
 y_predict = mms_test.inverse_transform(y_predict)
@@ -113,7 +130,6 @@ st.pyplot(fig2)
 # metrics
 st.subheader("Metrics to evaluate the performance of the model:")
 
-import streamlit as st
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 
 # Calculate MAE
