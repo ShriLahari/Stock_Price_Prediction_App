@@ -9,7 +9,7 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
-import os
+from io import BytesIO
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -25,24 +25,14 @@ def prepare_data(df, scaler):
 
 # Load model
 def load_stock_model(model_url):
-    # Download the model file
     response = requests.get(model_url)
-    model_file_path = "Stock_Price_Model.keras"
-    with open(model_file_path, 'wb') as f:
-        f.write(response.content)
-    
-    # Load the model from the downloaded file
-    model = load_model(model_file_path)
-
-    # Delete the temporary file
-    os.remove(model_file_path)
-
+    model_file = BytesIO(response.content)
+    model = load_model(model_file)
     return model
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
     return df['Close']
-
 
 # Streamlit app
 def main():
@@ -69,34 +59,9 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
-
-    # Closing Price vs Time graph with 100-day Moving Average
-    # Visualizations 
-    st.subheader("Closing Price vs Time graph with 100MA")
-    ma100 = df.rolling(100).mean()
-    fig = plt.figure(figsize=(12,6))
-    plt.plot(ma100, color='blue', label='100MA')
-    plt.plot(df, color='black', label='Closing Price')
-    plt.xlabel("Time")
-    plt.ylabel("Closing Price")
-    plt.legend()
-    st.pyplot(fig)
-
-
-    # Closing Price vs Time graph with 100-day and 200-day Moving Averages
-    # Visualizations 
-    st.subheader("Closing Price vs Time graph with 100MA & 200MA")
-    ma100 = df.rolling(100).mean()
-    ma200 = df.rolling(200).mean()
-    fig = plt.figure(figsize=(12,6))
-    plt.plot(ma100, color='blue', label='100MA')
-    plt.plot(ma200, color='red', label='200MA')
-    plt.plot(df, color='black', label='Closing Price')
-    plt.xlabel("Time")
-    plt.ylabel("Closing Price")
-    plt.legend()
-    st.pyplot(fig)
-
+    # Load model from URL
+    model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
+    model = load_stock_model(model_url)
 
     # Split data into training and testing
     train_size = int(len(df) * 0.70)
@@ -109,10 +74,6 @@ def main():
     # Prepare training and testing data
     X_train, y_train = prepare_data(df_train, scaler)
     X_test, y_test = prepare_data(df_test, scaler)
-
-    # Load model
-    model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
-    model = load_stock_model(model_url)
 
     # Make predictions
     y_predict = model.predict(X_test)
