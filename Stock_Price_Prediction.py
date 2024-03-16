@@ -9,7 +9,6 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
-import os
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -57,8 +56,7 @@ def main():
     st.pyplot(fig)
 
     # Closing Price vs Time graph with 100-day Moving Average
-    # Visualizations 
-    st.subheader("Closing Price vs Time graph with 100MA")
+    st.subheader("Closing Price vs Time graph with 100-day Moving Average")
     ma100 = df.rolling(100).mean()
     fig = plt.figure(figsize=(12,6))
     plt.plot(ma100, color='blue', label='100MA')
@@ -69,8 +67,7 @@ def main():
     st.pyplot(fig)
 
     # Closing Price vs Time graph with 100-day and 200-day Moving Averages
-    # Visualizations 
-    st.subheader("Closing Price vs Time graph with 100MA & 200MA")
+    st.subheader("Closing Price vs Time graph with 100-day & 200-day Moving Averages")
     ma100 = df.rolling(100).mean()
     ma200 = df.rolling(200).mean()
     fig = plt.figure(figsize=(12,6))
@@ -82,37 +79,43 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
-    # Load model from the specified path
+    # Load model
     model_path = "Stock_Price_Model.keras"
     model = load_stock_model(model_path)
 
-    # Split data into training and testing
-    train_size = int(len(df) * 0.70)
-    df_train, df_test = df[:train_size], df[train_size:]
+    # If model is loaded successfully
+    if model:
+        st.write("Model loaded successfully!")
+        # Split data into training and testing
+        train_size = int(len(df) * 0.70)
+        df_train, df_test = df[:train_size], df[train_size:]
 
-    # Scale data
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    scaler.fit(df_train.values.reshape(-1, 1))
+        # Scale data
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        scaler.fit(df_train.values.reshape(-1, 1))
 
-    # Prepare training and testing data
-    X_train, y_train = prepare_data(df_train, scaler)
-    X_test, y_test = prepare_data(df_test, scaler)
+        # Prepare training and testing data
+        X_train, y_train = prepare_data(df_train, scaler)
+        X_test, y_test = prepare_data(df_test, scaler)
 
-    # Make predictions
-    y_predict = model.predict(X_test)
-    y_predict = scaler.inverse_transform(y_predict)
-    y_test = scaler.inverse_transform(y_test.reshape(-1, 1))
+        # Make predictions
+        y_predict = model.predict(X_test)
+        y_predict = scaler.inverse_transform(y_predict)
+        y_test = scaler.inverse_transform(y_test.reshape(-1, 1))
 
-    # Calculate metrics
-    mae = mean_absolute_error(y_test, y_predict)
-    r2 = r2_score(y_test, y_predict)
-    rmse = mean_squared_error(y_test, y_predict, squared=False)
+        # Calculate metrics
+        mae = mean_absolute_error(y_test, y_predict)
+        r2 = r2_score(y_test, y_predict)
+        rmse = mean_squared_error(y_test, y_predict, squared=False)
 
-    # Display metrics
-    st.subheader("Metrics to evaluate the performance of the model:")
-    st.write("Mean Absolute Error (MAE):", mae)
-    st.write("R-squared (R2) Score:", r2)
-    st.write("Root Mean Squared Error (RMSE):", rmse)
+        # Display metrics
+        st.subheader("Metrics to evaluate the performance of the model:")
+        st.write("Mean Absolute Error (MAE):", mae)
+        st.write("R-squared (R2) Score:", r2)
+        st.write("Root Mean Squared Error (RMSE):", rmse)
+
+    else:
+        st.write("Failed to load the model!")
 
 if __name__ == "__main__":
     main()
