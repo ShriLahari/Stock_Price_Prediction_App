@@ -31,22 +31,24 @@ else:
 
     st.subheader("Closing Price vs Time graph with 100MA")
     ma100 = df['Close'].rolling(100).mean()
+    fig = plt.figure(figsize=(8, 6))
     plt.plot(ma100, color='blue', label='100MA')
     plt.plot(df['Close'], color='black', label='Closing Price')
     plt.xlabel("Time")
     plt.ylabel("Closing Price")
     plt.legend()
-    st.pyplot()
+    st.pyplot(fig)
 
     st.subheader("Closing Price vs Time graph with 100MA & 200MA")
     ma200 = df['Close'].rolling(200).mean()
+    fig1 = plt.figure(figsize=(8, 6))
     plt.plot(ma100, color='blue', label='100MA')
     plt.plot(ma200, color='red', label='200MA')
     plt.plot(df['Close'], color='black', label='Closing Price')
     plt.xlabel("Time")
     plt.ylabel("Closing Price")
     plt.legend()
-    st.pyplot()
+    st.pyplot(fig1)
 
     # Splitting the data into training and testing (train:70, test:30)
     df_train = df['Close'].iloc[:int(len(df) * 0.7)]
@@ -104,7 +106,7 @@ else:
 
     # Visualisations
     st.subheader("Comparing the Actual prices with Predicted prices")
-    fig2 = plt.figure(figsize=(12, 6))
+    fig2 = plt.figure(figsize=(8, 6))
     plt.plot(y_test, 'r', label='Original values')
     plt.plot(y_predict, 'green', label="Predicted values")
     plt.xlabel("Time")
