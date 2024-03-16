@@ -78,13 +78,10 @@ for i in range(100, len(df_train_scaled)):
     y_train.append(df_train_scaled[i, 0])
 
 X_train, y_train = np.array(X_train), np.array(y_train)
-X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
-
-
-from keras.models import load_model
+X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1)) 
 
 # Load the model
-my_model = load_model("Stock_Price_Model.h5")
+my_model = load_model(""Stock_Price_Model_weights.h5"")
 
 # Prepare test data
 X_test, y_test = [], []
