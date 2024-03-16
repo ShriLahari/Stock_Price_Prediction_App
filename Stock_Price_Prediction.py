@@ -1,14 +1,14 @@
  # importing all the necessary libraries to do the project
-
+import tensorflow 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas_datareader import data as pdr
 import yfinance as yf
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 import streamlit as st
-import tensorflow as tf
+
 
 # defining the start and end date of stock prices
 start_date ='2014-01-01'
