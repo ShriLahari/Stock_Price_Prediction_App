@@ -9,7 +9,11 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
-from keras.initializers import GlorotUniform
+from keras.initializers import glorot_uniform
+
+# Define Glorot uniform initializer function
+def custom_glorot_uniform(shape, dtype=None):
+    return glorot_uniform()(shape, dtype=dtype)
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -25,13 +29,8 @@ def prepare_data(df, scaler):
 
 # Load model
 def load_stock_model(model_path):
-    custom_objects = {'GlorotUniform': GlorotUniform()}
+    custom_objects = {'custom_glorot_uniform': custom_glorot_uniform}
     model = load_model(model_path, custom_objects=custom_objects)
-
-    # Set GlorotUniform as the initializer for LSTM layers
-    for layer in model.layers:
-        if 'LSTM' in layer.__class__.__name__:
-            layer.recurrent_initializer = 'glorot_uniform'
 
     return model
 
