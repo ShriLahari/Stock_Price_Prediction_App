@@ -9,6 +9,7 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
+from keras.initializers import GlorotUniform
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -24,12 +25,9 @@ def prepare_data(df, scaler):
 
 # Load model
 def load_stock_model(model_path):
-    try:
-        model = load_model(model_path)
-        return model
-    except Exception as e:
-        st.write("Error loading model:", e)
-        return None
+    custom_objects = {'GlorotUniform': GlorotUniform()}
+    model = load_model(model_path, custom_objects=custom_objects)
+    return model
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
@@ -64,40 +62,33 @@ def main():
     model_path = "Stock_Price_Model.keras"
     model = load_stock_model(model_path)
 
-    # If model is loaded successfully
-    if model:
-        st.write("Model loaded successfully!")
+    # Split data into training and testing
+    train_size = int(len(df) * 0.70)
+    df_train, df_test = df[:train_size], df[train_size:]
 
-        # Split data into training and testing
-        train_size = int(len(df) * 0.70)
-        df_train, df_test = df[:train_size], df[train_size:]
+    # Scale data
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaler.fit(df_train.values.reshape(-1, 1))
 
-        # Scale data
-        scaler = MinMaxScaler(feature_range=(0, 1))
-        scaler.fit(df_train.values.reshape(-1, 1))
+    # Prepare training and testing data
+    X_train, y_train = prepare_data(df_train, scaler)
+    X_test, y_test = prepare_data(df_test, scaler)
 
-        # Prepare training and testing data
-        X_train, y_train = prepare_data(df_train, scaler)
-        X_test, y_test = prepare_data(df_test, scaler)
+    # Make predictions
+    y_predict = model.predict(X_test)
+    y_predict = scaler.inverse_transform(y_predict)
+    y_test = scaler.inverse_transform(y_test.reshape(-1, 1))
 
-        # Make predictions
-        y_predict = model.predict(X_test)
-        y_predict = scaler.inverse_transform(y_predict)
-        y_test = scaler.inverse_transform(y_test.reshape(-1, 1))
+    # Calculate metrics
+    mae = mean_absolute_error(y_test, y_predict)
+    r2 = r2_score(y_test, y_predict)
+    rmse = mean_squared_error(y_test, y_predict, squared=False)
 
-        # Calculate metrics
-        mae = mean_absolute_error(y_test, y_predict)
-        r2 = r2_score(y_test, y_predict)
-        rmse = mean_squared_error(y_test, y_predict, squared=False)
-
-        # Display metrics
-        st.subheader("Metrics to evaluate the performance of the model:")
-        st.write("Mean Absolute Error (MAE):", mae)
-        st.write("R-squared (R2) Score:", r2)
-        st.write("Root Mean Squared Error (RMSE):", rmse)
-
-    else:
-        st.write("Failed to load the model!")
+    # Display metrics
+    st.subheader("Metrics to evaluate the performance of the model:")
+    st.write("Mean Absolute Error (MAE):", mae)
+    st.write("R-squared (R2) Score:", r2)
+    st.write("Root Mean Squared Error (RMSE):", rmse)
 
 if __name__ == "__main__":
     main()
