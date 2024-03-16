@@ -8,6 +8,8 @@ from keras.models import load_model
 import streamlit as st 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
+import requests
+import os
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -22,8 +24,20 @@ def prepare_data(df, scaler):
     return X, y
 
 # Load model
-def load_stock_model(model_path):
-    return load_model(model_path)
+def load_stock_model(model_url):
+    # Download the model file
+    response = requests.get(model_url)
+    model_file_path = "Stock_Price_Model.keras"
+    with open(model_file_path, 'wb') as f:
+        f.write(response.content)
+    
+    # Load the model from the downloaded file
+    model = load_model(model_file_path)
+
+    # Delete the temporary file
+    os.remove(model_file_path)
+
+    return model
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
@@ -97,7 +111,8 @@ def main():
     X_test, y_test = prepare_data(df_test, scaler)
 
     # Load model
-    model = load_stock_model("https://github.com/ShriLahari/Stock_Price_Prediction_App/blob/main/Stock_Price_Model.keras")
+    model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
+    model = load_stock_model(model_url)
 
     # Make predictions
     y_predict = model.predict(X_test)
