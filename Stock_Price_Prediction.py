@@ -9,7 +9,6 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
-from io import BytesIO
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -24,11 +23,8 @@ def prepare_data(df, scaler):
     return X, y
 
 # Load model
-def load_stock_model(model_url):
-    response = requests.get(model_url)
-    model_file = BytesIO(response.content)
-    model = load_model(model_file)
-    return model
+def load_stock_model(model_path):
+    return load_model(model_path)
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
@@ -59,9 +55,11 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
-    # Load model from URL
+    # Load model from GitHub
     model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
-    model = load_stock_model(model_url)
+    model_path = "Stock_Price_Model.keras"
+    download_model(model_url, model_path)
+    model = load_stock_model(model_path)
 
     # Split data into training and testing
     train_size = int(len(df) * 0.70)
@@ -90,6 +88,11 @@ def main():
     st.write("Mean Absolute Error (MAE):", mae)
     st.write("R-squared (R2) Score:", r2)
     st.write("Root Mean Squared Error (RMSE):", rmse)
+
+def download_model(model_url, model_path):
+    response = requests.get(model_url)
+    with open(model_path, 'wb') as f:
+        f.write(response.content)
 
 if __name__ == "__main__":
     main()
