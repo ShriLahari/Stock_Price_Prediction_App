@@ -56,9 +56,9 @@ def main():
     st.pyplot(fig)
 
     # Load model from GitHub
-    model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
+    # model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
     model_path = "Stock_Price_Model.keras"
-    download_model(model_url, model_path)
+    # download_model(model_url, model_path)
     model = load_stock_model(model_path)
 
     # Split data into training and testing
