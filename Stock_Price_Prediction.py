@@ -25,10 +25,10 @@ def prepare_data(df, scaler):
 def load_stock_model(model_path):
     return load_model(model_path)
 
-# Load data for the selected stock
 def load_stock_data(stock_ticker, start_date, end_date):
-    df = pdr.get_data_yahoo(stock_ticker, start=start_date, end=end_date)
+    df = yf.download(stock_ticker, start=start_date, end=end_date)
     return df['Close']
+
 
 # Streamlit app
 def main():
