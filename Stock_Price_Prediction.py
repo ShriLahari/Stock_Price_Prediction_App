@@ -97,7 +97,7 @@ def main():
     X_test, y_test = prepare_data(df_test, scaler)
 
     # Load model
-    model = load_stock_model("Stock_Price_Model.keras")
+    model = load_stock_model("https://github.com/ShriLahari/Stock_Price_Prediction_App/blob/main/Stock_Price_Model.keras")
 
     # Make predictions
     y_predict = model.predict(X_test)
