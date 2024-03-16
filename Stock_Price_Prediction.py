@@ -24,7 +24,12 @@ def prepare_data(df, scaler):
 
 # Load model
 def load_stock_model(model_path):
-    return load_model(model_path)
+    try:
+        model = load_model(model_path)
+        return model
+    except Exception as e:
+        st.write("Error loading model:", e)
+        return None
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
@@ -55,30 +60,6 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
-    # Closing Price vs Time graph with 100-day Moving Average
-    st.subheader("Closing Price vs Time graph with 100-day Moving Average")
-    ma100 = df.rolling(100).mean()
-    fig = plt.figure(figsize=(12,6))
-    plt.plot(ma100, color='blue', label='100MA')
-    plt.plot(df, color='black', label='Closing Price')
-    plt.xlabel("Time")
-    plt.ylabel("Closing Price")
-    plt.legend()
-    st.pyplot(fig)
-
-    # Closing Price vs Time graph with 100-day and 200-day Moving Averages
-    st.subheader("Closing Price vs Time graph with 100-day & 200-day Moving Averages")
-    ma100 = df.rolling(100).mean()
-    ma200 = df.rolling(200).mean()
-    fig = plt.figure(figsize=(12,6))
-    plt.plot(ma100, color='blue', label='100MA')
-    plt.plot(ma200, color='red', label='200MA')
-    plt.plot(df, color='black', label='Closing Price')
-    plt.xlabel("Time")
-    plt.ylabel("Closing Price")
-    plt.legend()
-    st.pyplot(fig)
-
     # Load model
     model_path = "Stock_Price_Model.keras"
     model = load_stock_model(model_path)
@@ -86,6 +67,7 @@ def main():
     # If model is loaded successfully
     if model:
         st.write("Model loaded successfully!")
+
         # Split data into training and testing
         train_size = int(len(df) * 0.70)
         df_train, df_test = df[:train_size], df[train_size:]
