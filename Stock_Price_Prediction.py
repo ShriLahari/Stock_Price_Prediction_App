@@ -8,6 +8,7 @@ from pandas_datareader import data as pdr
 import yfinance as yf
 from keras.models import load_model
 import streamlit as st
+import tensorflow as tf
 
 # defining the start and end date of stock prices
 start_date ='2014-01-01'
@@ -81,7 +82,9 @@ X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 
 
 # loading the model
-my_model = load_model("Stock_Price_Model.h5")
+# loading the model with custom objects
+my_model = load_model("Stock_Price_Model.h5", custom_objects={'Orthogonal': tf.keras.initializers.Orthogonal})
+
 
 # Prepare test data
 X_test, y_test = [], []
