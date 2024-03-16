@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas_datareader import data as pdr
 import yfinance as yf
+from keras.models import load_model  
 import streamlit as st 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
-import tensorflow as tf
+import os
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -23,8 +24,20 @@ def prepare_data(df, scaler):
     return X, y
 
 # Load model
-def load_stock_model(model_path):
-    return tf.keras.models.load_model(model_path)
+def load_stock_model(model_url):
+    # Download the model file
+    response = requests.get(model_url)
+    model_file_path = "Stock_Price_Model.keras"
+    with open(model_file_path, 'wb') as f:
+        f.write(response.content)
+    
+    # Load the model from the downloaded file
+    model = load_model(model_file_path)
+
+    # Delete the temporary file
+    os.remove(model_file_path)
+
+    return model
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
@@ -55,11 +68,9 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
-    # Load model from GitHub
+    # Load model
     model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
-    model_path = "Stock_Price_Model.keras"
-    download_model(model_url, model_path)
-    model = load_stock_model(model_path)
+    model = load_stock_model(model_url)
 
     # Split data into training and testing
     train_size = int(len(df) * 0.70)
@@ -88,11 +99,6 @@ def main():
     st.write("Mean Absolute Error (MAE):", mae)
     st.write("R-squared (R2) Score:", r2)
     st.write("Root Mean Squared Error (RMSE):", rmse)
-
-def download_model(model_url, model_path):
-    response = requests.get(model_url)
-    with open(model_path, 'wb') as f:
-        f.write(response.content)
 
 if __name__ == "__main__":
     main()
