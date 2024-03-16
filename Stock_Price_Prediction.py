@@ -9,11 +9,6 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
-from keras.initializers import Orthogonal
-
-# Define custom Orthogonal initializer function
-def custom_orthogonal(shape, gain=1.0, seed=None):
-    return Orthogonal(gain=gain, seed=seed)(shape)
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -29,10 +24,7 @@ def prepare_data(df, scaler):
 
 # Load model
 def load_stock_model(model_path):
-    custom_objects = {'custom_orthogonal': custom_orthogonal}
-    model = load_model(model_path, custom_objects=custom_objects)
-
-    return model
+    return load_model(model_path)
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
@@ -63,8 +55,8 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
-    # Load model from GitHub
-    model_path = "Stock_Price_Model.keras"
+    # Load model
+    model_path = "Stock_Price_Model.h5"
     model = load_stock_model(model_path)
 
     # Split data into training and testing
