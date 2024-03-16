@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas_datareader import data as pdr
 import yfinance as yf
-from keras.models import load_model  
 import streamlit as st 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
+import tensorflow as tf
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -24,7 +24,7 @@ def prepare_data(df, scaler):
 
 # Load model
 def load_stock_model(model_path):
-    return load_model(model_path)
+    return tf.keras.models.load_model(model_path)
 
 def load_stock_data(stock_ticker, start_date, end_date):
     df = yf.download(stock_ticker, start=start_date, end=end_date)
@@ -56,9 +56,9 @@ def main():
     st.pyplot(fig)
 
     # Load model from GitHub
-    # model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
+    model_url = "https://github.com/ShriLahari/Stock_Price_Prediction_App/raw/main/Stock_Price_Model.keras"
     model_path = "Stock_Price_Model.keras"
-    # download_model(model_url, model_path)
+    download_model(model_url, model_path)
     model = load_stock_model(model_path)
 
     # Split data into training and testing
