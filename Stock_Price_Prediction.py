@@ -81,10 +81,10 @@ X_train, y_train = np.array(X_train), np.array(y_train)
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 
 
-# loading the model
-# loading the model with custom objects
-my_model = load_model("Stock_Price_Model.h5", custom_objects={'Orthogonal': tf.keras.initializers.Orthogonal})
+from keras.models import load_model
 
+# Load the model
+my_model = load_model("Stock_Price_Model.h5")
 
 # Prepare test data
 X_test, y_test = [], []
