@@ -27,6 +27,12 @@ def prepare_data(df, scaler):
 def load_stock_model(model_path):
     custom_objects = {'GlorotUniform': GlorotUniform()}
     model = load_model(model_path, custom_objects=custom_objects)
+
+    # Set GlorotUniform as the initializer for LSTM layers
+    for layer in model.layers:
+        if 'LSTM' in layer.__class__.__name__:
+            layer.recurrent_initializer = 'glorot_uniform'
+
     return model
 
 def load_stock_data(stock_ticker, start_date, end_date):
@@ -58,7 +64,7 @@ def main():
     plt.legend()
     st.pyplot(fig)
 
-    # Load model
+    # Load model from GitHub
     model_path = "Stock_Price_Model.keras"
     model = load_stock_model(model_path)
 
