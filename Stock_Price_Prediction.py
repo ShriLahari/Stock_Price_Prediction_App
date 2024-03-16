@@ -27,7 +27,7 @@ if not os.path.exists(model_file):
 
 try:
     # Load the model
-    my_model = load_model(Stock_Price_Model(1).h5)
+    my_model = load_model(Stock_Price_Model (1).h5)
 except Exception as e:
     st.error(f"Error loading the model: {str(e)}")
     st.stop()
