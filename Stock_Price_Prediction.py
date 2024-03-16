@@ -9,11 +9,11 @@ import streamlit as st
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import requests
-from keras.initializers import glorot_uniform
+from keras.initializers import Orthogonal
 
-# Define Glorot uniform initializer function
-def custom_glorot_uniform(shape, dtype=None):
-    return glorot_uniform()(shape, dtype=dtype)
+# Define custom Orthogonal initializer function
+def custom_orthogonal(shape, gain=1.0, seed=None):
+    return Orthogonal(gain=gain, seed=seed)(shape)
 
 # Define function to preprocess and prepare data
 def prepare_data(df, scaler):
@@ -29,7 +29,7 @@ def prepare_data(df, scaler):
 
 # Load model
 def load_stock_model(model_path):
-    custom_objects = {'custom_glorot_uniform': custom_glorot_uniform}
+    custom_objects = {'custom_orthogonal': custom_orthogonal}
     model = load_model(model_path, custom_objects=custom_objects)
 
     return model
