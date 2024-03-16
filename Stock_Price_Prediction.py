@@ -1,14 +1,14 @@
- # importing all the necessary libraries to do the project
-import tensorflow 
+import tensorflow as tf
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from pandas_datareader import data as pdr
 import yfinance as yf
+from pandas_datareader import data as pdr
 from tensorflow.keras.models import load_model
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import streamlit as st
-
 
 # defining the start and end date of stock prices
 start_date ='2014-01-01'
@@ -18,6 +18,19 @@ st.title("Stock Price Trend Prediction")
 
 user_input = st.text_input("Enter any Stock's Ticker Symbol",'MSFT')
 df = yf.download("MSFT",start_date,end_date)
+
+# Check if the model file exists
+model_file = "Stock_Price_Model (1).h5"
+if not os.path.exists(model_file):
+    st.error("Model file not found. Please make sure the model file exists.")
+    st.stop()
+
+try:
+    # Load the model
+    my_model = load_model(Stock_Price_Model(1).h5)
+except Exception as e:
+    st.error(f"Error loading the model: {str(e)}")
+    st.stop()
 
 # Statistical data analysis
 st.subheader("Summary Statistical data of stocks from 2014 to 2023")
@@ -57,14 +70,10 @@ plt.legend()
 st.pyplot(fig)
 
 # Splitting the data into training and testing (train:70, test:30)
-
 df_train = pd.DataFrame(df['Close'][0:int(len(df)*0.70)])
 df_test =  pd.DataFrame(df['Close'][int(len(df)*0.70): int(len(df))])
+
 # Scaling the data using MinMaxScaler
-
-from sklearn.preprocessing import MinMaxScaler
-
-# Scaling the training and testing data separately
 mms_train = MinMaxScaler(feature_range=(0, 1))
 mms_test = MinMaxScaler(feature_range=(0, 1))
 
@@ -79,9 +88,6 @@ for i in range(100, len(df_train_scaled)):
 
 X_train, y_train = np.array(X_train), np.array(y_train)
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1)) 
-
-# Load the model
-my_model = load_model("Stock_Price_Model (1).h5")
 
 # Prepare test data
 X_test, y_test = [], []
@@ -100,7 +106,6 @@ y_predict = mms_test.inverse_transform(y_predict)
 y_test = mms_test.inverse_transform(y_test.reshape(-1, 1))
 
 # Visualisations
-
 st.subheader("Comparing the Actual prices with Predicted prices")
 fig2 = plt.figure(figsize=(12,6))
 plt.plot(y_test, 'r', label='Original values')
@@ -110,11 +115,8 @@ plt.ylabel("Price")
 plt.legend()
 st.pyplot(fig2)
 
-# metrics
+# Metrics
 st.subheader("Metrics to evaluate the performance of the model:")
-
-import streamlit as st
-from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 
 # Calculate MAE
 mae = mean_absolute_error(y_test, y_predict)
